@@ -1,0 +1,117 @@
+{
+  "name": "Historia Clinica OCR → JSON",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "historia-clinica",
+        "options": {}
+      },
+      "id": "1",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "resource": "document",
+        "operation": "analyze",
+        "documentType": "generalDocument",
+        "additionalFields": {}
+      },
+      "id": "2",
+      "name": "Google Vision OCR",
+      "type": "n8n-nodes-base.googleCloudVision",
+      "typeVersion": 1,
+      "position": [500, 300],
+      "credentials": {
+        "googleCloudVisionApi": "Google Vision Account"
+      }
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "prompt": "Extrae la información de la siguiente historia clínica y devuélvela en JSON con los campos: { id, nombre, edad, diagnostico, fechaConsulta, direccion, telefono, observaciones }.\n\nTexto:\n{{$json[\"text\"]}}"
+      },
+      "id": "3",
+      "name": "OpenAI - Extraer Datos",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [750, 300],
+      "credentials": {
+        "openAiApi": "OpenAI Account"
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "return [{\n  json: {\n    id: `HC-${Date.now()}`,\n    ...JSON.parse(items[0].json.text)\n  }\n}];"
+      },
+      "id": "4",
+      "name": "Formatear Historia",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [1000, 300]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "historias_clinicas",
+        "columns": "id,nombre,edad,diagnostico,fechaConsulta,direccion,telefono,observaciones"
+      },
+      "id": "5",
+      "name": "MySQL - Guardar",
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 1,
+      "position": [1250, 300],
+      "credentials": {
+        "mySql": "MySQL Account"
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Google Vision OCR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Vision OCR": {
+      "main": [
+        [
+          {
+            "node": "OpenAI - Extraer Datos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI - Extraer Datos": {
+      "main": [
+        [
+          {
+            "node": "Formatear Historia",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatear Historia": {
+      "main": [
+        [
+          {
+            "node": "MySQL - Guardar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
