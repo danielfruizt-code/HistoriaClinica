@@ -1,0 +1,41 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "functionCode": "return [{ json: { text: `HISTORIA CLÍNICA\n\nNombre: Juan Pérez\nEdad: 34\nDiagnóstico: Hipertensión arterial\nFecha de Consulta: 15/09/2025\nDirección: Calle Falsa 123, Bogotá\nTeléfono: 3201234567\nObservaciones: El paciente refiere dolores de cabeza frecuentes.` } }];"
+      },
+      "id": "1",
+      "name": "Simular OCR",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://tu-servidor:8000/procesar",
+        "method": "POST",
+        "jsonParameters": true,
+        "options": {},
+        "body": "{ \"text\": \"{{$json[\"text\"]}}\" }"
+      },
+      "id": "2",
+      "name": "API Python - Extraer Datos",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [500, 300]
+    }
+  ],
+  "connections": {
+    "Simular OCR": {
+      "main": [
+        [
+          {
+            "node": "API Python - Extraer Datos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

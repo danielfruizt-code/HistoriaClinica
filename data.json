@@ -28,21 +28,21 @@
     },
     {
       "parameters": {
-        "model": "gpt-4o-mini",
-        "prompt": "Extrae la información de la siguiente historia clínica y devuélvela en JSON con los campos: { id, nombre, edad, diagnostico, fechaConsulta, direccion, telefono, observaciones }.\n\nTexto:\n{{$json[\"text\"]}}"
+        "url": "http://tu-servidor:8000/procesar",
+        "method": "POST",
+        "jsonParameters": true,
+        "options": {},
+        "body": "{ \"text\": \"{{$json[\"text\"]}}\" }"
       },
       "id": "3",
-      "name": "OpenAI - Extraer Datos",
-      "type": "n8n-nodes-base.openAi",
+      "name": "API Python - Extraer Datos",
+      "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 1,
-      "position": [750, 300],
-      "credentials": {
-        "openAiApi": "OpenAI Account"
-      }
+      "position": [750, 300]
     },
     {
       "parameters": {
-        "functionCode": "return [{\n  json: {\n    id: `HC-${Date.now()}`,\n    ...JSON.parse(items[0].json.text)\n  }\n}];"
+        "functionCode": "return [{\n  json: {\n    id: items[0].json.id,\n    nombre: items[0].json.nombre,\n    edad: items[0].json.edad,\n    diagnostico: items[0].json.diagnostico,\n    fechaConsulta: items[0].json.fechaConsulta,\n    direccion: items[0].json.direccion,\n    telefono: items[0].json.telefono,\n    observaciones: items[0].json.observaciones\n  }\n}];"
       },
       "id": "4",
       "name": "Formatear Historia",
@@ -82,14 +82,14 @@
       "main": [
         [
           {
-            "node": "OpenAI - Extraer Datos",
+            "node": "API Python - Extraer Datos",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "OpenAI - Extraer Datos": {
+    "API Python - Extraer Datos": {
       "main": [
         [
           {
