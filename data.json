@@ -1,32 +1,30 @@
 {
-  "name": "Historia Clinica OCR → JSON",
   "nodes": [
     {
       "parameters": {
-        "path": "historia-clinica",
-        "options": {}
+        "host": "ftp.example.com",
+        "port": 21,
+        "username": "your_username",
+        "password": "your_password",
+        "operation": "Download",
+        "fileName": "historia-clinica.png",
+        "directory": "/path/to/file"
       },
       "id": "1",
-      "name": "Webhook",
-      "type": "n8n-nodes-base.webhook",
+      "name": "FTP - Descargar Historia Clínica",
+      "type": "n8n-nodes-base.ftp",
       "typeVersion": 1,
       "position": [250, 300]
     },
     {
       "parameters": {
-        "resource": "document",
-        "operation": "analyze",
-        "documentType": "generalDocument",
-        "additionalFields": {}
+        "functionCode": "const fs = require('fs');\nconst { execSync } = require('child_process');\n\nconst pathFile = '/tmp/historia-clinica.png';\nconst outputFile = '/tmp/output.txt';\n\n// Guardar archivo binario temporalmente\nfs.writeFileSync(pathFile, Buffer.from(items[0].binary.data.data, 'base64'));\n\n// Ejecutar Tesseract OCR (idioma español)\nexecSync(`tesseract ${pathFile} /tmp/output -l spa`);\n\n// Leer texto extraído\nconst texto = fs.readFileSync(outputFile, 'utf8');\n\n// Borrar archivos temporales\nfs.unlinkSync(pathFile);\nfs.unlinkSync(outputFile);\n\nreturn [{ json: { text: texto } }];"
       },
       "id": "2",
-      "name": "Google Vision OCR",
-      "type": "n8n-nodes-base.googleCloudVision",
+      "name": "Ejecutar Tesseract OCR",
+      "type": "n8n-nodes-base.function",
       "typeVersion": 1,
-      "position": [500, 300],
-      "credentials": {
-        "googleCloudVisionApi": "Google Vision Account"
-      }
+      "position": [500, 300]
     },
     {
       "parameters": {
@@ -69,18 +67,18 @@
     }
   ],
   "connections": {
-    "Webhook": {
+    "FTP - Descargar Historia Clínica": {
       "main": [
         [
           {
-            "node": "Google Vision OCR",
+            "node": "Ejecutar Tesseract OCR",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Google Vision OCR": {
+    "Ejecutar Tesseract OCR": {
       "main": [
         [
           {
