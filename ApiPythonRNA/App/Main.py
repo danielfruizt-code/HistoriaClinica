@@ -5,16 +5,23 @@ import json
 import datetime
 from fastapi import FastAPI, HTTPException, Request, Header
 from pydantic import BaseModel
-from extractor import extract_fields, extract_with_model, load_model
-from db import SessionLocal, init_db, save_feedback
-from models import TrainingExample
+from App.extractor import extract_fields, extract_with_model, load_model
+from App.db import SessionLocal, init_db, save_feedback
+from App.models import TrainingExample
 from dotenv import load_dotenv
 
 load_dotenv()
 API_KEY = os.getenv("API_KEY", "changeme")
 MODEL_DIR = os.getenv("MODEL_DIR", "models/current")
 
-app = FastAPI(title="OCR -> Estructuración API")
+app = FastAPI(
+    title="OCR -> Estructuración API",
+    description="API para extracción y almacenamiento de historias clínicas",
+    version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc",
+    openapi_url="/openapi.json",
+)
 
 # intenta cargar el modelo entrenado (si existe)
 nlp = load_model(MODEL_DIR)
@@ -29,6 +36,8 @@ class FeedbackIn(BaseModel):
 @app.on_event("startup")
 def startup():
     init_db()
+# @app.get("/prueba")
+# return "Ok Api python arriba"
 
 @app.post("/procesar")
 def procesar(payload: TextIn):

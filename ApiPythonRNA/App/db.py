@@ -3,7 +3,7 @@ import os
 import json
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from models import Base, TrainingExample
+from App.models import Base, TrainingExample
 from dotenv import load_dotenv
 
 load_dotenv()
